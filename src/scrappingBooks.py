@@ -14,7 +14,7 @@ def addBooks(href, category):
     newSoup = BeautifulSoup(newPage.content, 'html.parser')
     books = newSoup.find_all('div', class_="item")
     response_delay = time.time() - t0
-    time.sleep(1 * response_delay)
+    #time.sleep(1 * response_delay)
     images = []
     i = 0
     for book in books:
@@ -44,8 +44,8 @@ def addBooks(href, category):
         categories.append(category)
 
         #Cridar la funció per anar el detall del llibre
-        #detailUrl =  book.find('div', class_="col-lg-8").find('a').get('href')
-        #getDetail(detailUrl)
+        detailUrl =  book.find('div', class_="col-lg-8").find('a').get('href')
+        getDetail(detailUrl)
 
     #PAGINACIÓ Mira si hi ha pàgina següent
     if newSoup.find('a', rel="next"):
@@ -57,18 +57,40 @@ def getDetail(url):
     detailSoup = BeautifulSoup(detailPage.content, 'html.parser')
     books = detailSoup.find('div', class_="card-block")
     print(url)
+    categories = list()
     if books:
         lis = books.find_all('li')
         for li in lis:
-            text = li.find('span').text
-            if text == 'Editorial':
-                editorial.append(li.find('a').text)
-            if text == 'Año de edición':
-                yearEditionName = li.text
-                yearEdition.append(yearEditionName.replace("Año de edición",""))
-            if text == 'ISBN':
-                isbnName = li.text
-                isbns.append(isbnName.replace("ISBN",""))
+            categories.append(li.find('span').text)
+        if 'Editorial' in categories:
+            for li in lis:
+                text = li.find('span').text
+                if text == 'Editorial':
+                    editorial.append(li.find('a').text)
+        else:
+            editorial.append("")
+        if 'Año de edición' in categories:
+            for li in lis:
+                text = li.find('span').text
+                if text == 'Año de edición':
+                    yearEditionName = li.text
+                    yearEdition.append(yearEditionName.replace("Año de edición", ""))
+        else:
+            yearEditionName.append("")
+        if 'ISBN' in categories:
+            for li in lis:
+                text = li.find('span').text
+                if text == 'ISBN':
+                    isbnName = li.text
+                    isbns.append(isbnName.replace("ISBN", ""))
+        else:
+            isbns.append("")
+
+
+
+
+
+
 
 #Funció per obtenir les portades
 def load_requests(source_url):
@@ -125,7 +147,7 @@ for link in soup.find_all('a', href=True):
             secondLink = link2.get('href')
             #Filtres que vaig utilitzar per fer proves
             #if ('mejores-genero/historia-del-cine' in secondLink or 'mejores-genero/actores' in secondLink):
-            # if ('mejores-genero/historica-y-aventuras' in secondLink):
+            #if ('mejores-genero/historica-y-aventuras' in secondLink):
             # Filtrar per les urls que necessitem
             if ('mejores-genero/' in secondLink):
                 categoryPage = requests.get(secondLink, headers=headers)
@@ -136,7 +158,7 @@ for link in soup.find_all('a', href=True):
                 addBooks(secondLink, category)
 
 #Crear el csv
-df = pd.DataFrame({'Título': titles, 'Autor': autors,  'Categoría': categories, 'Posición': rankings,'Nota Media': averageNotes,'Votos': votes,'Nota': notes,'Críticas': reviews,'Resumen': summaries})
+df = pd.DataFrame({'Título': titles, 'Autor': autors,  'Categoría': categories, 'Editorial': editorial,'Año de edición': yearEdition, 'ISBN': isbns, 'Idioma': languages,'Posición': rankings,'Nota Media': averageNotes,'Votos': votes,'Nota': notes,'Críticas': reviews,'Resumen': summaries})
 print(df)
-df.to_csv('Clasificacion.csv', index="False")
+df.to_csv('Libros.csv', index="False")
 
