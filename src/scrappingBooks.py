@@ -44,8 +44,13 @@ def addBooks(href, category):
         categories.append(category)
 
         #Cridar la funció per anar el detall del llibre
-        detailUrl =  book.find('div', class_="col-lg-8").find('a').get('href')
-        getDetail(detailUrl)
+        #detailUrl =  book.find('div', class_="col-lg-8").find('a').get('href')
+        #if detailUrl:
+        #    getDetail(detailUrl)
+        #else:
+        #   editorial.append("")
+        #   yearEdition.append("")
+        #   isbns.append("")
 
     #PAGINACIÓ Mira si hi ha pàgina següent
     if newSoup.find('a', rel="next"):
@@ -71,12 +76,12 @@ def getDetail(url):
             editorial.append("")
         if 'Año de edición' in categories:
             for li in lis:
-                text = li.find('span').text
-                if text == 'Año de edición':
+               text = li.find('span').text
+               if text == 'Año de edición':
                     yearEditionName = li.text
                     yearEdition.append(yearEditionName.replace("Año de edición", ""))
         else:
-            yearEditionName.append("")
+            yearEdition.append("")
         if 'ISBN' in categories:
             for li in lis:
                 text = li.find('span').text
@@ -85,6 +90,7 @@ def getDetail(url):
                     isbns.append(isbnName.replace("ISBN", ""))
         else:
             isbns.append("")
+
 
 
 
@@ -158,7 +164,7 @@ for link in soup.find_all('a', href=True):
                 addBooks(secondLink, category)
 
 #Crear el csv
-df = pd.DataFrame({'Título': titles, 'Autor': autors,  'Categoría': categories, 'Editorial': editorial,'Año de edición': yearEdition, 'ISBN': isbns, 'Idioma': languages,'Posición': rankings,'Nota Media': averageNotes,'Votos': votes,'Nota': notes,'Críticas': reviews,'Resumen': summaries})
+df = pd.DataFrame({'Título': titles, 'Autor': autors,  'Categoría': categories,'Posición': rankings,'Nota Media': averageNotes,'Votos': votes,'Nota': notes,'Críticas': reviews,'Resumen': summaries})
 print(df)
 df.to_csv('Libros.csv', index="False")
 
